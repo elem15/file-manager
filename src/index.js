@@ -8,7 +8,8 @@ const userName = argv[2].split('=')[1];
 
 console.log(`Welcome to the File Manager, ${userName}!`)
 rl.on('line', (input) => {
-  if(input.trim() === '.exit') {
+  if(input.trim() === '.exit') {    
     rl.close();
   }
 });
+rl.on('close', () => console.log(`Thank you for using File Manager, ${userName}!`))
