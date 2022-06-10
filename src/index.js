@@ -1,7 +1,6 @@
 import { argv } from 'process';
 import * as readline from 'node:readline';
 import { stdin as input, stdout as output } from 'process';
-import { spawn } from 'node:child_process';
 import path from 'path';
 import os from 'os';
 import fsp from 'fs/promises';
@@ -29,8 +28,8 @@ rl.on('line', (input) => {
     navigator.up();
   }
   if(input.startsWith('cd ')) { 
-    const pathToDir = input.split(' ')[1];
-    navigator.cd(pathToDir);
+    const newPath = input.split(' ')[1];
+    navigator.cd(newPath);
   }
 
 });

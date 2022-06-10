@@ -15,7 +15,7 @@ export default class {
     if(this.path !== this.homePath) {
       const currentPath = this.path.split(path.sep);
       currentPath.pop();
-      this.path = path.join(...currentPath);
+      this.path = path.join(path.sep, ...currentPath);
     }
     console.log(`Your current path is ${this.path}`);
   }
@@ -31,7 +31,9 @@ export default class {
       else if (stats.isDirectory()) {
         this.path = newPath;
         console.log(`Your current path is ${this.path}`);
-      } else throw new Error();
+      } else {
+        throw new Error();
+      }
     } catch (err) {
       console.log('Operation failed');
     }
