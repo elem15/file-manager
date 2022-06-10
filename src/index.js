@@ -51,6 +51,14 @@ rl.on('line', (input) => {
     const fileNames = filesCommandHelper(input, navigator, files);
     files.cp(...fileNames);
   }
+  else if (input.startsWith('mv ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.mv(...fileNames);
+  }
+  else if (input.startsWith('rm ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.rm(...fileNames);
+  }
   else {
     console.log('Invalid input');
   }
