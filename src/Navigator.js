@@ -38,4 +38,7 @@ export default class {
       console.log('Operation failed');
     }
   }
+  get() {
+    return this.path;
+  }
 }

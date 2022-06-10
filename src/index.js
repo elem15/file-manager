@@ -6,6 +6,8 @@ import os from 'os';
 import fsp from 'fs/promises';
 
 import Navigator from './Navigator.js'
+import Files from './Files.js';
+import filesCommandHelper from './filesCommandHelper.js';
 
 const rl = readline.createInterface({ input, output });
 
@@ -14,24 +16,44 @@ const userName = argv[2].split('=')[1];
 const home = os.homedir();
 
 const navigator = new Navigator(home);
+const files = new Files();
 
 console.log(`Welcome to the File Manager, ${userName}!`)
 rl.on('line', (input) => {
   input = input.trim()
-  if(input === '.exit') {    
+  if (input === '.exit') {
     rl.close();
   }
-  if(input === 'ls') {    
+  else if (input === 'ls') {
     navigator.ls();
   }
-  if(input === 'up') {    
+  else if (input === 'up') {
     navigator.up();
   }
-  if(input.startsWith('cd ')) { 
-    const newPath = input.split(' ')[1];
+  else if (input.startsWith('cd ')) {
+    const commandArr = input.split(' ');
+    const newPath = commandArr[commandArr.length - 1];
     navigator.cd(newPath);
   }
-
+  else if (input.startsWith('cat ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.cat(...fileNames);
+  }
+  else if (input.startsWith('add ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.add(...fileNames);
+  }
+  else if (input.startsWith('rn ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.rn(...fileNames);
+  }
+  else if (input.startsWith('cp ')) {
+    const fileNames = filesCommandHelper(input, navigator, files);
+    files.cp(...fileNames);
+  }
+  else {
+    console.log('Invalid input');
+  }
 });
 
 rl.on('close', () => console.log(`Thank you for using File Manager, ${userName}!`));
