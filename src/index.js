@@ -6,16 +6,27 @@ import os from 'os';
 import fsp from 'fs/promises';
 
 const home = os.homedir();
-const userName = argv[2].split('=')[1];
+
+let userName;
+try {
+  userName = argv[2].split('=')[1];
+} catch {
+  console.log('To get correct user name, please exit and try again. \n', 
+    'Type "npm run start --- --username=your_username" (3! ---) \n',
+    'or "node ./src/index.js -- --username=your_username"')
+  userName = 'user_name'
+}
 
 import Navigator from './Navigator.js'
 import Files from './Files.js';
 import filesCommandHelper from './filesCommandHelper.js';
 import Os from './Os.js';
+import Hash from './Hash.js';
 
 const navigator = new Navigator(home);
 const files = new Files();
 const osInfo = new Os();
+const hash = new Hash();
 
 const rl = readline.createInterface({ input, output });
 
@@ -68,6 +79,12 @@ rl.on('line', (input) => {
     } catch {
       console.log('Invalid input');
     }
+  }
+  else if (input.startsWith('hash ')) {
+    const commandArr = input.split(' ');
+    const fileName = commandArr[commandArr.length - 1];
+    const currentPath = navigator.get();
+    hash.printHash(fileName, currentPath);
   }
   else {
     console.log('Invalid input');

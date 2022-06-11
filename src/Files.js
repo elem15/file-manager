@@ -1,4 +1,4 @@
-import path, { sep } from 'path';
+import path from 'path';
 import fs from 'fs';
 import fsp from 'fs/promises';
 import { stat } from 'fs/promises';
