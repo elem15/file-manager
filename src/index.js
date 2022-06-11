@@ -5,18 +5,19 @@ import path from 'path';
 import os from 'os';
 import fsp from 'fs/promises';
 
+const home = os.homedir();
+const userName = argv[2].split('=')[1];
+
 import Navigator from './Navigator.js'
 import Files from './Files.js';
 import filesCommandHelper from './filesCommandHelper.js';
-
-const rl = readline.createInterface({ input, output });
-
-const userName = argv[2].split('=')[1];
-
-const home = os.homedir();
+import Os from './Os.js';
 
 const navigator = new Navigator(home);
 const files = new Files();
+const osInfo = new Os();
+
+const rl = readline.createInterface({ input, output });
 
 console.log(`Welcome to the File Manager, ${userName}!`)
 rl.on('line', (input) => {
@@ -58,6 +59,15 @@ rl.on('line', (input) => {
   else if (input.startsWith('rm ')) {
     const fileNames = filesCommandHelper(input, navigator, files);
     files.rm(...fileNames);
+  }
+  else if (input.startsWith('os ')) {
+    try {
+      const commandsArr = input.split(' ');
+      const commandName = commandsArr.filter(item => item.startsWith('--'))[0].slice(2);
+      osInfo[commandName]();
+    } catch {
+      console.log('Invalid input');
+    }
   }
   else {
     console.log('Invalid input');
