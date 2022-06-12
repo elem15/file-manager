@@ -2,10 +2,11 @@ import path from 'path';
 import fs from 'fs';
 import fsp from 'fs/promises';
 import { stat } from 'fs/promises';
+import { pipeline } from 'stream';
 
 export default class Files {
   constructor() {
-    this.pathToDir = null;
+    this.pathToDir = '';
   }
   setPath(currentPath) {
     this.pathToDir = currentPath;
@@ -40,7 +41,7 @@ export default class Files {
       }
     }
   }
-  async rn(pathToFile, newFilename) {
+  async rn(pathToFile = '', newFilename = '', errMessage = 'Operation failed') {
     let src;
     let destination;
     if (!path.isAbsolute(pathToFile)) {
@@ -53,21 +54,45 @@ export default class Files {
       destination = path.join(path.sep, ...pathToDir, newFilename);
     }
     try {
-      await fsp.rename(src, destination);
-    } catch {
-      console.log('Operation failed');
+      await fsp.access(destination);
+      throw new Error('File exist')
+    } catch (err) {
+      if (err.message !== 'File exist') {
+        try {
+          await fsp.access(src);
+          const srcStream = fs.createReadStream(src);
+          const destinationStream = fs.createWriteStream(destination);
+          pipeline(
+            srcStream,
+            destinationStream,
+            (err) => {
+              if (err) {
+                console.log(errMessage);
+              }
+            }
+          )
+          srcStream.on('end', async () => fs.rm(src, err => {
+            if (err) console.log(errMessage);
+          }));
+        } catch {
+          console.log(errMessage);
+        }
+      } else {
+        console.log(errMessage);
+      }
     }
   }
+
   async rm(pathToFile) {
     let src;
     if (!path.isAbsolute(pathToFile)) {
       src = path.join(this.pathToDir, pathToFile);
-    } else { 
+    } else {
       src = pathToFile;
     }
     try {
       const stats = await stat(src);
-      if(stats.isFile()) {
+      if (stats.isFile()) {
         await fsp.rm(src);
         console.log(`File ${src} was removed`)
       } else {
@@ -77,7 +102,7 @@ export default class Files {
       console.log('Operation failed');
     }
   }
-  async cp(pathToFile, newPathToDir) {
+  async cp(pathToFile, newPathToDir, errMessage = 'Operation failed') {
     let src;
     let fileName;
     let destination;
@@ -94,44 +119,50 @@ export default class Files {
     if (!path.isAbsolute(newPathToDir)) {
       destination = path.join(this.pathToDir, newPathToDir, fileName);
       destinationDir = path.join(this.pathToDir, newPathToDir);
-    } else {   
+    } else {
       destination = path.join(newPathToDir, fileName);
       destinationDir = newPathToDir;
-    }    
+    }
     try {
       await fsp.mkdir(destinationDir, { recursive: true });
-      await fsp.copyFile(src, destination);
+      try {
+        await fsp.access(destination);
+        throw new Error('File exist')
+      } catch (err) {
+        if (err.message !== 'File exist') {
+          try {
+            await fsp.access(src);
+            const srcStream = fs.createReadStream(src);
+            const destinationStream = fs.createWriteStream(destination);
+            pipeline(
+              srcStream,
+              destinationStream,
+              (err) => {
+                if (err) {
+                  console.log(errMessage);
+                  return '';
+                }
+              }
+            )
+          } catch {
+            console.log(errMessage);
+            return '';
+          }
+        } else {
+          console.log(errMessage);
+          return '';
+        }
+      }
     } catch {
-      console.log('Operation failed');
+      console.log(errMessage);
+      return '';
     }
+    return src;
   }
-  async mv(pathToFile, newPathToDir) {
-    let src;
-    let fileName;
-    let destination;
-    let destinationDir;
-
-    if (!path.isAbsolute(pathToFile)) {
-      src = path.join(this.pathToDir, pathToFile);
-      fileName = pathToFile;
-    } else {
-      const pathToDir = pathToFile.split(path.sep);
-      fileName = pathToDir.pop();
-      src = pathToFile;
-    }
-    if (!path.isAbsolute(newPathToDir)) {
-      destination = path.join(this.pathToDir, newPathToDir, fileName);
-      destinationDir = path.join(this.pathToDir, newPathToDir);
-    } else {   
-      destination = path.join(newPathToDir, fileName);
-      destinationDir = newPathToDir;
-    }    
-    try {
-      await fsp.mkdir(destinationDir, { recursive: true });
-      await fsp.copyFile(src, destination);
-      await fsp.rm(src);
-    } catch {
-      console.log('Operation failed');
-    }
+  async mv(pathToFile, newPathToDir) {  
+      const src = await this.cp(pathToFile, newPathToDir, '');
+      fs.rm(src, err => {
+        if (err) console.log('Operation failed');
+      });  
   }
 }
