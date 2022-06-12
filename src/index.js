@@ -22,11 +22,13 @@ import Files from './Files.js';
 import filesCommandHelper from './filesCommandHelper.js';
 import Os from './Os.js';
 import Hash from './Hash.js';
+import Britoli from './Britoli.js';
 
 const navigator = new Navigator(home);
 const files = new Files();
 const osInfo = new Os();
 const hash = new Hash();
+const britoli = new Britoli();
 
 const rl = readline.createInterface({ input, output });
 
@@ -85,6 +87,14 @@ rl.on('line', (input) => {
     const fileName = commandArr[commandArr.length - 1];
     const currentPath = navigator.get();
     hash.printHash(fileName, currentPath);
+  }
+  else if (input.startsWith('compress ')) {
+    const fileNames = filesCommandHelper(input, navigator, britoli);
+    britoli.compress(...fileNames);
+  }
+  else if (input.startsWith('decompress ')) {
+    const fileNames = filesCommandHelper(input, navigator, britoli);
+    britoli.decompress(...fileNames);
   }
   else {
     console.log('Invalid input');
