@@ -34,7 +34,6 @@ export default class {
       const britoliCompressStream = archiveProcess();
       const srcStream = fs.createReadStream(this.pathToSrc);
       const destinationStream = fs.createWriteStream(this.pathToDestination);
-      console.log(this.pathToSrc, this.pathToDestination);
       pipeline(
         srcStream,
         britoliCompressStream,

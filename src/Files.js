@@ -99,7 +99,7 @@ export default class Files {
       destinationDir = newPathToDir;
     }    
     try {
-      await fsp.mkdir(destinationDir, { recursive: false });
+      await fsp.mkdir(destinationDir, { recursive: true });
       await fsp.copyFile(src, destination);
     } catch {
       console.log('Operation failed');
@@ -127,10 +127,9 @@ export default class Files {
       destinationDir = newPathToDir;
     }    
     try {
-      await fsp.mkdir(destinationDir, { recursive: false });
+      await fsp.mkdir(destinationDir, { recursive: true });
       await fsp.copyFile(src, destination);
       await fsp.rm(src);
-
     } catch {
       console.log('Operation failed');
     }
